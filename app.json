@@ -1,6 +1,6 @@
 {
   "name": "Crossfit heces",
-  "description": "A barebones Node.js app using Express 4",
+  "description": "Aprovecha el tiempo que malgastabas reservando para comer heces",
   "repository": "https://github.com/Bolito2/crossfit-heces",
   "logo": "https://cdn.rawgit.com/heroku/node-js-getting-started/master/public/node.svg",
   "keywords": ["node", "express", "heroku"],

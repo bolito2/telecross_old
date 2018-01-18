@@ -1,17 +1,17 @@
 {
   "name": "crossfit-heces",
   "version": "0.1.0",
-  "description": "A sample Node.js app using Express 4",
+  "description": "Aprovecha el tiempo que malgastabas reservando para comer heces",
   "engines": {
     "node": "8.9.1"
   },
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node index.js"
   },
   "dependencies": {
-    "ejs": "^2.5.6",
-    "express": "^4.15.2"
+    "ejs": "^2.5.7",
+    "express": "^4.16.2"
   },
   "devDependencies": {
     "request": "^2.81.0",
