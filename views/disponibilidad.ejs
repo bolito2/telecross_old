@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+	<head>	
+	<title>Crossfit-heces</title>
+	</head>
+	
+	<body>
+		<form action="/reservar" method="get">
+			<input type="hidden" name="accessToken" value="<%=accessToken%>" />
+			<h2>Día : <%=fecha.toDateString()%></h2>
+			<h2>Selecciona la hora a la que quieres ir</h2>
+			<select name = "sesion">
+				<%sesiones.hora.forEach(function(hora){%>
+				<option value="<%=JSON.stringify({"idHorarioActividad":hora.idHorarioActividad.toString() ,"fecha":{"hora":hora.time.hours, "minuto":hora.time.minutes, "ano":sesiones.dia.ano, "mes":sesiones.dia.mes, "dia":sesiones.dia.dia}})%>"><%=hora.time.hours + ":" + hora.time.minutes%></option>
+				<%});%>
+			</select>
+			<input type="submit" value="OK">
+		</form>
+		
+	</body>
+<html>

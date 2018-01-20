@@ -1,0 +1,2 @@
+create table reservas (id serial primary key,email text not null unique, pass text not null, token text, programacion text)
+insert into reservas(email, pass) values ('pus', 'pelos')

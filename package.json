@@ -11,10 +11,13 @@
   },
   "dependencies": {
     "ejs": "^2.5.7",
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "node-schedule": "^1.3.0",
+    "pg": "6.x",
+    "psql": "0.0.1"
   },
   "devDependencies": {
-    "request": "^2.81.0",
+    "request": "^2.83.0",
     "tape": "^4.7.0"
   },
   "repository": {
