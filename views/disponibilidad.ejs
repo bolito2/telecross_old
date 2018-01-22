@@ -13,7 +13,10 @@
 				<%sesiones.hora.forEach(function(hora){%>
 				<option value="<%=JSON.stringify({"idHorarioActividad":hora.idHorarioActividad.toString() ,"fecha":{"hora":hora.time.hours, "minuto":hora.time.minutes, "ano":sesiones.dia.ano, "mes":sesiones.dia.mes, "dia":sesiones.dia.dia}})%>"><%=hora.time.hours + ":" + hora.time.minutes%></option>
 				<%});%>
-			</select>
+			</select><br>
+			<input type="radio" name="repetir" value="nada" checked> Reservar solo para este dia<br>
+			<input type="radio" name="repetir" value="yee"> Programar esta reserva para todas las semanas <br>
+			<input type="radio" name="repetir" value="nein"> Borrar la programación de esta reserva para todas las semanas(soy un pussy) <br>
 			<input type="submit" value="OK">
 		</form>
 		
