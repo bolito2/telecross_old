@@ -119,16 +119,16 @@ app.get('/borrarProg', function(req, res){
 	pg.connect(process.env.DATABASE_URL, function(err, client, done){
 		if(err){
 			console.log("Error al conectar a la base de datos para borrar una reserva programada");
-			res.send("Error al conectar a la base de datos para borrar una reserva programada");
+			res.send("Error al conectar a la base de datos para borrar una reserva programada, te jodes y vas a crossfit");
 		}else{
 			programacion.splice(index, 1);
 			client.query("UPDATE reservas SET programacion = '" + JSON.stringify(programacion) + "' WHERE token = '" + accessToken + "'", function(err, result){
 				if(err){
 					console.log("Error al intentar borrar una reserva programada");
-					res.send("Error al intentar borrar una reserva programada");
+					res.send("Error al intentar borrar una reserva programada, te jodes y vas a crossfit");
 				}else{
 					console.log("Se ha borrado la reserva");
-					res.send("Se ha borrado la reserva");
+					res.send("Se ha borrado la reserva, ya puedes viciar al lol tranquilo pedazo de pussy");
 				}
 			});
 		}
