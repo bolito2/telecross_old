@@ -135,6 +135,10 @@ app.get('/borrarProg', function(req, res){
 	});
 });
 
+function sortProg(a, b){
+	return a.dia - b.dia;
+}
+
 app.get('/programacion', function(req, res){
 	var accessToken = req.query.accessToken;
 	
@@ -149,7 +153,7 @@ app.get('/programacion', function(req, res){
 					console.log("Error al intentar ver reservas programadas");
 					res.send("Error al intentar ver reservas programadas");
 				}else{
-					var convertTable = ['Domingo  ','Lunes    ','Martes   ','Miercoles','Jueves   ','Viernes  ','Sabado   '];
+					var convertTable = ['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
 					
 					res.render('programacion', {programacion:JSON.parse(result.rows[0].programacion), convertTable:convertTable, accessToken:accessToken});
 				}
@@ -338,6 +342,7 @@ app.get('/reservar', function(req, res){
 								var fechaProg = new Date(sesion.fecha.ano, mes, sesion.fecha.dia, 1, 0 ,0 ,0);
 								var newProg = {'dia':fechaProg.getDay(), 'hora':sesion.fecha.hora, 'minuto':sesion.fecha.minuto};
 								programacion.push(newProg);
+								programacion.sort(sortProg);
 								console.log(programacion);
 								programacion = JSON.stringify(programacion);
 								
