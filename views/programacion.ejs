@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+	<head>	
+	<title>Crossfit-heces</title>
+	</head>
+	
+	<body>
+		<h1>CROSSFIT-HECES</h1>
+		<form action="/borrarProg" method="get">
+		<input type="hidden" value="<%=JSON.stringify(programacion)%>" name="programacion" />
+		<input type="hidden" name="accessToken" value="<%=accessToken%>" />
+			<%for(var i = 0; i < programacion.length; i++){%>
+			<%=convertTable[programacion[i].dia]%> a las <%=programacion[i].hora%>:<%=programacion[i].minuto%><button type="submit" value=<%=i%> name="Submit">X</button><br>
+			<%}%>
+		</form>
+	</body>
+<html>

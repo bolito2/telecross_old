@@ -111,6 +111,53 @@ function disponibilidad(accessToken, fechaObj, callback){
 		);
 }
 
+app.get('/borrarProg', function(req, res){
+	var accessToken = req.query.accessToken;
+	var programacion = JSON.parse(req.query.programacion);
+	var index = req.query.Submit;
+	
+	pg.connect(process.env.DATABASE_URL, function(err, client, done){
+		if(err){
+			console.log("Error al conectar a la base de datos para borrar una reserva programada");
+			res.send("Error al conectar a la base de datos para borrar una reserva programada");
+		}else{
+			programacion.splice(index, 1);
+			client.query("UPDATE reservas SET programacion = '" + JSON.stringify(programacion) + "' WHERE token = '" + accessToken + "'", function(err, result){
+				if(err){
+					console.log("Error al intentar borrar una reserva programada");
+					res.send("Error al intentar borrar una reserva programada");
+				}else{
+					console.log("Se ha borrado la reserva");
+					res.send("Se ha borrado la reserva");
+				}
+			});
+		}
+	});
+});
+
+app.get('/programacion', function(req, res){
+	var accessToken = req.query.accessToken;
+	
+	pg.connect(process.env.DATABASE_URL, function(err, client, done){
+		if(err){
+			console.log("Error al conectar a la base de datos para ver reservas programadas");
+			res.send("Error al conectar a la base de datos para ver reservas programadas");
+		}else{
+			client.query("SELECT programacion FROM reservas WHERE token LIKE '" + accessToken + "'", function(err, result){
+				done();
+				if(err){
+					console.log("Error al intentar ver reservas programadas");
+					res.send("Error al intentar ver reservas programadas");
+				}else{
+					var convertTable = ['Domingo  ','Lunes    ','Martes   ','Miercoles','Jueves   ','Viernes  ','Sabado   '];
+					
+					res.render('programacion', {programacion:JSON.parse(result.rows[0].programacion), convertTable:convertTable, accessToken:accessToken});
+				}
+			});
+		}
+	});
+})
+
 app.get('/disponibilidad', function(req, res){
 		var index = parseInt(req.query.fecha);
 		var accessToken = req.query.accessToken.toString();
