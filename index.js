@@ -121,16 +121,17 @@ app.get('/borrarProg', function(req, res){
 			console.log("Error al conectar a la base de datos para borrar una reserva programada");
 			res.send("Error al conectar a la base de datos para borrar una reserva programada, te jodes y vas a crossfit");
 		}else{
-			programacion.splice(index, 1);
-			client.query("UPDATE reservas SET programacion = '" + JSON.stringify(programacion) + "' WHERE token = '" + accessToken + "'", function(err, result){
-				if(err){
-					console.log("Error al intentar borrar una reserva programada");
-					res.send("Error al intentar borrar una reserva programada, te jodes y vas a crossfit");
-				}else{
-					console.log("Se ha borrado la reserva");
-					res.send("Se ha borrado la reserva, ya puedes viciar al lol tranquilo pedazo de pussy");
-				}
-			});
+			if(programacion.splice(index, 1) != []){
+				client.query("UPDATE reservas SET programacion = '" + JSON.stringify(programacion) + "' WHERE token = '" + accessToken + "'", function(err, result){
+					if(err){
+						console.log("Error al intentar borrar una reserva programada");
+						res.send("Error al intentar borrar una reserva programada, te jodes y vas a crossfit");
+					}else{
+						console.log("Se ha borrado la reserva");
+						res.send("Se ha borrado la reserva, ya puedes viciar al lol tranquilo pedazo de pussy");
+					}
+				});
+			}else console.log("REFRESH");
 		}
 	});
 });
@@ -141,6 +142,8 @@ function sortProg(a, b){
 
 app.get('/programacion', function(req, res){
 	var accessToken = req.query.accessToken;
+	
+	res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
 	
 	pg.connect(process.env.DATABASE_URL, function(err, client, done){
 		if(err){
@@ -153,9 +156,14 @@ app.get('/programacion', function(req, res){
 					console.log("Error al intentar ver reservas programadas");
 					res.send("Error al intentar ver reservas programadas");
 				}else{
-					var convertTable = ['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
+					var programacion = JSON.parse(result.rows[0].programacion);
 					
-					res.render('programacion', {programacion:JSON.parse(result.rows[0].programacion), convertTable:convertTable, accessToken:accessToken});
+					if(programacion.length == 0){
+						res.send("Lol no tienes reservas programadas vaya un puto casual");
+					}else{
+						var convertTable = ['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
+						res.render('programacion', {programacion:programacion, convertTable:convertTable, accessToken:accessToken});
+					}
 				}
 			});
 		}
