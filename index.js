@@ -229,19 +229,19 @@ function reservares(res, sesion, accessToken){
 				res.write(error);
 			}else{
 				if(body.Result == 0){
-					res.write("Se ha realizado la reserva correctamente, ya puedes comer excrementos humanos tranquilo");
+					res.write("Reserva instantanea: Se ha realizado la reserva correctamente, ya puedes comer excrementos humanos tranquilo");
 				}else{
 					if(body.Result == 410){
-						res.write("Me cago en mis putos excrementos ha habido un error con el código " + body.Result.toString() + " que creo que significa que ya has reservado esta hora pedazo de n00b");
+						res.write("Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el código " + body.Result.toString() + " que creo que significa que ya has reservado esta hora pedazo de n00b");
 					}
 					else if(body.Result == 411){
-						res.write("Me cago en mis putos excrementos ha habido un error con el código " + body.Result.toString() + " que creo que significa que ya has reservado otra actividad esta hora VAYA UN N33B YENDO A ALGO QUE NO ES CROSSFIT");
+						res.write("Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el código " + body.Result.toString() + " que creo que significa que ya has reservado otra actividad esta hora VAYA UN N33B YENDO A ALGO QUE NO ES CROSSFIT");
 					}
 					else if(body.Result == 401){
-						res.write("Me cago en mis putos excrementos ha habido un error con el código " + body.Result.toString() + " que creo que significa que ya no hay plazas disponibles yororo");
+						res.write("Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el código " + body.Result.toString() + " que creo que significa que ya no hay plazas disponibles yororo");
 					}
 					else{
-						res.write("No se que heces has hecho pero has obtenido un error que no he visto en mi vida con el codigo " + body.Result.toString());
+						res.write("Reserva instantanea: No se que heces has hecho pero has obtenido un error que no he visto en mi vida con el codigo " + body.Result.toString());
 					}
 				}
 			}
@@ -325,7 +325,7 @@ app.get('/reservar', function(req, res){
 						}
 						if(index != -1){
 							if(repetir == 'yee'){
-								res.write("Ya tienes programada esta reserva n00b\n");
+								res.write("Programacion de reservas: Ya tienes programada esta reserva n00b\n");
 								reservares(res, sesion, accessToken);
 								
 							}else{
@@ -338,7 +338,7 @@ app.get('/reservar', function(req, res){
 										console.log("Error al quitar la reserva:" + err);
 										res.write("Error al quitar la reserva:" + err+ "\n");
 									}else{
-										res.write("Se ha desprogramado la reserva pedazo de pussy, ya puedes viciarte al lol tranquilo\n");
+										res.write("Programacion de reservas: Se ha desprogramado la reserva pedazo de pussy, ya puedes viciarte al lol tranquilo\n");
 									}
 									res.end();
 								});
@@ -360,12 +360,12 @@ app.get('/reservar', function(req, res){
 										console.log("Error al programar la reserva:" + err);
 										res.write("Error al programar la reserva:" + err+ "\n");
 									}else{
-										res.write("Se ha programado la reserva correctamente, a ver si es verdad que vienes a esta sesion todas las semanas\n");
+										res.write("Programacion de reservas: Se ha programado la reserva correctamente, a ver si es verdad que vienes a esta sesion todas las semanas\n");
 									}
 									reservares(res, sesion, accessToken);
 								});
 							}else{
-								res.write("No tienes esta reserva programada n33b\n");
+								res.write("Programacion de reservas: No tienes esta reserva programada n33b\n");
 								res.end();
 							}
 						}
