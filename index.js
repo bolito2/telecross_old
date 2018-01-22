@@ -123,6 +123,7 @@ app.get('/borrarProg', function(req, res){
 		}else{
 			if(programacion.splice(index, 1) != []){
 				client.query("UPDATE reservas SET programacion = '" + JSON.stringify(programacion) + "' WHERE token = '" + accessToken + "'", function(err, result){
+					done();
 					if(err){
 						console.log("Error al intentar borrar una reserva programada");
 						res.send("Error al intentar borrar una reserva programada, te jodes y vas a crossfit");
