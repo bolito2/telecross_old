@@ -142,8 +142,8 @@ app.get('/disponibilidad', function(req, res){
 							}
 						}
 					}
-					if(sesiones.dia.length == 0){
-						res.send("No hay sesiones de cross para este día");
+					if(sesiones.hora.length == 0){
+						res.send("No hay sesiones de cross para este día, puedes viciar al lol sin remordimientos");
 					}
 					else{
 						res.render('disponibilidad', {sesiones:sesiones, fecha:fecha, accessToken:accessToken});
