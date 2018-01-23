@@ -257,4 +257,3 @@ app.get('/reservar', function(req, res){
 	}else{
 		pt.reservar(res, sesion, accessToken);
 	}
-});
