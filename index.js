@@ -317,7 +317,7 @@ app.get('/reservar', function(req, res){
 							var mes = parseInt(sesion.fecha.mes) -1;
 							if(mes < 0)mes += 12;
 							var fechaSesion = new Date(sesion.fecha.ano, mes, sesion.fecha.dia);
-							if(evento.hora == sesion.fecha.hora && evento.minuto == sesion.fecha.minuto &&
+							if(((evento.hora == sesion.fecha.hora && evento.minuto == sesion.fecha.minuto) || repetir == 'yee') &&
 							evento.dia == fechaSesion.getDay()){
 								index = i;
 								console.log("repe");
@@ -326,7 +326,7 @@ app.get('/reservar', function(req, res){
 						}
 						if(index != -1){
 							if(repetir == 'yee'){
-								res.write("Programacion de reservas: Ya tienes programada esta reserva n00b\n");
+								res.write("Programacion de reservas: Ya tienes programada una reserva para ese dia n00b\n");
 								reservares(res, sesion, accessToken);
 								
 							}else{
