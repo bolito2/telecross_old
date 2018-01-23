@@ -43,6 +43,7 @@ pg.connect(process.env.DATABASE_URL, function(err, client, done){
 							});
 						});
 					});
+					console.log("Reservas acabadas");
 				}
 			});
 		}
