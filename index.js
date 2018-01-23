@@ -379,7 +379,7 @@ app.get('/reservar', function(req, res){
 	}
 });
 
-var j = schedule.scheduleJob({hour:00, minute:15}, function(expDate){
+var j = schedule.scheduleJob({hour:15, minute:5}, function(expDate){
 	console.log('Expected date: ' + expDate);
 	console.log('Actual date: ' + new Date());
 	
