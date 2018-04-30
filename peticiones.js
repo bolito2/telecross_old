@@ -19,22 +19,28 @@ module.exports = {
 			if(error){
 				console.log(error);
 				res.write(error);
-			}else if(res != 0){
-				if(body.Result == 0){
-					res.write("Reserva instantanea: Se ha realizado la reserva correctamente, ya puedes comer excrementos humanos tranquilo");
+				
+				return error;
+			}else{
+				if(res != 0){
+					if(body.Result == 0){
+						res.write("Reserva instantanea: Se ha realizado la reserva correctamente, ya puedes comer excrementos humanos tranquilo");
+					}else{
+						if(body.Result == 410){
+							res.write("Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya has reservado esta hora pedazo de n00b");
+						}
+						else if(body.Result == 411){
+							res.write("Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya has reservado otra actividad esta hora VAYA UN N33B YENDO A ALGO QUE NO ES CROSSFIT");
+						}
+						else if(body.Result == 401){
+							res.write("Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya no hay plazas disponibles yororo");
+						}
+						else{
+							res.write("Reserva instantanea: No se que heces has hecho pero has obtenido un error que no he visto en mi vida con el codigo " + body.Result.toString());
+						}
+					}
 				}else{
-					if(body.Result == 410){
-						res.write("Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya has reservado esta hora pedazo de n00b");
-					}
-					else if(body.Result == 411){
-						res.write("Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya has reservado otra actividad esta hora VAYA UN N33B YENDO A ALGO QUE NO ES CROSSFIT");
-					}
-					else if(body.Result == 401){
-						res.write("Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya no hay plazas disponibles yororo");
-					}
-					else{
-						res.write("Reserva instantanea: No se que heces has hecho pero has obtenido un error que no he visto en mi vida con el codigo " + body.Result.toString());
-					}
+					return body.Result;
 				}
 			}
 			if(res != 0)res.end();
