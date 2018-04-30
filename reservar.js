@@ -3,15 +3,18 @@ var pt = require('./peticiones')
 
 var nodemailer = require('nodemailer')
 
+var diasDeLaSemana = ['sudapo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+
 var transporter = nodemailer.createTransport({
-  auth: {
-    user: 'postmaster@sandboxbfd316c13dde4a9dab861546ffd36ce9.mailgun.org',
-    pass: '74df866f81a7c17890f52ca22a3ea34c-116e1e4d-a879b076'
-  }
+  service: 'Mailgun',
+    auth: {
+      user: 'postmaster@sandboxbfd316c13dde4a9dab861546ffd36ce9.mailgun.org', // postmaster@sandbox[base64 string].mailgain.org
+      pass: 'xdloljuisio69' // You set this.
+    }
 });
 
 var mailOptions = {
-  from: 'crossfit-heces@mailgun.org',
+  from: 'crossfit-heces@megustacomermierda.com',
   to: 'bolito2hd@gmail.com',
   subject: 'Informe reservas',
   text: 'That was easy!'
@@ -45,25 +48,43 @@ pg.connect(process.env.DATABASE_URL, function(err, client, done){
 							var ano = fechaReserva.getFullYear().toString();
 							
 							var fechaObj = {"mes":mes,"dia":dia,"ano":ano};
+							var encontrada = false;
 							
 							pt.disponibilidad(accessToken, fechaObj, function(body){
 								for(var i = 0; i < body.d.zones.length; i++){
 									for(var j = 0; j < body.d.zones[i].datas.length; j++){
 										var data = body.d.zones[i].datas[j];
 										if(data.idActividad == 92874 && data.hora.hours == reserva.hora && data.hora.minutes == reserva.minuto){
+											encontrada = true;
 											var sesion = {'idHorarioActividad':data.idHorarioActividad, "fecha":{"hora":data.hora.hours, "minuto":data.hora.minutes, "ano":ano, "mes":mes, "dia":dia}};
-											var returnCode = pt.reservar(0, sesion, accessToken);
-											
-											mailOptions.text = usuario.email+ " a las " + reserva.hora + ":" + reserva.minuto +" con resultado " + returnCode;
-											transporter.sendMail(mailOptions, function(error, info){
-											  if (error) {
-												console.log(error);
-											  } else {
-												console.log('Email sent: ' + info.response);
-											  }
-											});
+											pt.reservar(function(code, message){
+												if(code != 0 && code != 410){
+													mailOptions.to = usuario.email;
+													if(usuario.email == 'oscar_alvarez62@hotmail.es')mailOptions.to = 'bolito2hd@gmail.com';
+													mailOptions.text = "La reserva del "+ diasDeLaSemana[reserva.dia] + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado con el siguiente mensaje:\n" + message;
+													transporter.sendMail(mailOptions, function(error, info){
+													  if (error) {
+														console.log(error);
+													  } else {
+														console.log('Email sent: ' + info.response);
+													  }
+													});
+												}
+											}, sesion, accessToken, 699696969696);
 										}
 									}
+								}
+								if(!encontrada){
+									mailOptions.to = usuario.email;
+									if(usuario.email == 'oscar_alvarez62@hotmail.es')mailOptions.to = 'bolito2hd@gmail.com';
+									mailOptions.text = "La reserva del "+ diasDeLaSemana[reserva.dia] + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado ya que no existe. Igual está cerrado el gym o han cambiado la hora";
+									transporter.sendMail(mailOptions, function(error, info){
+										if (error) {
+											console.log(error);
+										} else {
+											console.log('Email sent: ' + info.response);
+										}
+									});
 								}
 							});
 						});
