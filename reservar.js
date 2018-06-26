@@ -57,7 +57,7 @@ pg.connect(process.env.DATABASE_URL, function(err, client, done){
 										if(data.idActividad == 92874 && data.hora.hours == reserva.hora && data.hora.minutes == reserva.minuto){
 											encontrada = true;
 											var sesion = {'idHorarioActividad':data.idHorarioActividad, "fecha":{"hora":data.hora.hours, "minuto":data.hora.minutes, "ano":ano, "mes":mes, "dia":dia}};
-											pt.reservar(function(code, message){
+											pt.reservarCB(function(code, message){
 												if(code != 0 && code != 410){
 													mailOptions.to = usuario.email;
 													if(usuario.email == 'oscar_alvarez62@hotmail.es')mailOptions.to = 'bolito2hd@gmail.com';
@@ -70,7 +70,7 @@ pg.connect(process.env.DATABASE_URL, function(err, client, done){
 													  }
 													});
 												}
-											}, sesion, accessToken, 699696969696);
+											}, sesion, accessToken);
 										}
 									}
 								}

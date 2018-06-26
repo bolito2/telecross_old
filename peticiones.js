@@ -42,7 +42,7 @@ module.exports = {
 			if(res != 0)res.end();
 		});
 	},
-	reservar: function(cb, sesion, accessToken, xdlolsoloparaquetengaotroarg){
+	reservarCB: function(cb, sesion, accessToken){
 		const options = {
 		  method: 'POST',
 		  uri: 'http://trainingymapp.com/admin/api/socios/reservas/reservarApp',
