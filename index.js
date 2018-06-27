@@ -24,7 +24,7 @@ app.get('/horario', function(req, res){
 });
 	
 app.post('/login', function(req, res){
-	email = req.body.email;
+	email = req.body.email.toLowerCase();
 	pass = req.body.pass;
 	
 	console.log(email);
