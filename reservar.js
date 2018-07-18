@@ -20,7 +20,10 @@ var mailOptions = {
   text: 'That was easy!'
 };
 
-setTimeout(hacerReservas, Math.floor(Math.random()*30000) + 30000)
+//setTimeout(hacerReservas, Math.floor(Math.random()*30000) + 30000)
+console.log("SCHEDULING RESERVAS")
+
+setTimeout(hacerReservas, 1000)
 
 function hacerReservas(){
 	console.log("EMPEZANDO RESERVAS");
