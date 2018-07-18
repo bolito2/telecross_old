@@ -42,7 +42,7 @@ function hacerReservas(){
 							var accessToken = usuario.token;
 							JSON.parse(usuario.programacion).forEach(function(reserva){
 								var fechaReserva = realDate;
-								var diferencia = reserva.dia - fechaReserva.getDay();
+								var diferencia = reserva.dia - fechaReserva.getDay() - 1;
 								if(diferencia > 0)fechaReserva.setDate(fechaReserva.getDate() + diferencia);
 								else fechaReserva.setDate(fechaReserva.getDate() + diferencia + 7);
 								
@@ -60,7 +60,7 @@ function hacerReservas(){
 								var encontrada = false;
 								
 								pt.disponibilidad(accessToken, fechaObj, function(body){
-									var info = "";
+									var info = "-diferencia: " + diferencia + "\n\n";
 									for(var i = 0; i < body.d.zones.length; i++){
 										for(var j = 0; j < body.d.zones[i].datas.length; j++){
 											var data = body.d.zones[i].datas[j];
