@@ -37,7 +37,7 @@ function hacerReservas(){
 						
 						realDate = new Date();
 						if(realDate.getHours() > 8)realDate.setDate(realDate.getDate() + 1)
-						
+					
 						result.rows.forEach(function(usuario){
 							var accessToken = usuario.token;
 							JSON.parse(usuario.programacion).forEach(function(reserva){
@@ -60,7 +60,7 @@ function hacerReservas(){
 								var encontrada = false;
 								
 								pt.disponibilidad(accessToken, fechaObj, function(body){
-									var info = "-diferencia: " + diferencia + "\n\n";
+									var info = "-realdate: "+ realDate.getDate() +",diferencia: " + diferencia + "\n\n";
 									for(var i = 0; i < body.d.zones.length; i++){
 										for(var j = 0; j < body.d.zones[i].datas.length; j++){
 											var data = body.d.zones[i].datas[j];
