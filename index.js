@@ -258,14 +258,3 @@ app.get('/reservar', function(req, res){
 		pt.reservar(res, sesion, accessToken);
 	}
 });
-
-//Bot
-const Slimbot = require('slimbot');
-const sb = new Slimbot(process.env.BOT_TOKEN)
-
-sb.on('message', message => {
-	sb.sendMessage(message.chat.id, 'Popper')
-})
-
-sb.startPolling() 
-
