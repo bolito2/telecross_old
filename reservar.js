@@ -23,6 +23,7 @@ var mailOptions = {
 setTimeout(hacerReservas, Math.floor(Math.random()*30000) + 30000)
 
 function hacerReservas(){
+	console.log("EMPEZANDO RESERVAS");
 	pg.connect(process.env.DATABASE_URL, function(err, client, done){
 			if(err){
 				console.log("ERROR AL CONECTAR A LA BASE DE DATOS POR LA NIT");
