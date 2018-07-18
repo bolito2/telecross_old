@@ -60,9 +60,13 @@ function hacerReservas(){
 								var encontrada = false;
 								
 								pt.disponibilidad(accessToken, fechaObj, function(body){
+									var info = "";
 									for(var i = 0; i < body.d.zones.length; i++){
 										for(var j = 0; j < body.d.zones[i].datas.length; j++){
 											var data = body.d.zones[i].datas[j];
+											
+											info += '-idActividad: ' + data.idActividad + ', hora actividad: ' + data.hora.hours + ':' + data.hora.minuto + '\n';
+											
 											if(data.idActividad == 92874 && data.hora.hours == reserva.hora && data.hora.minutes == reserva.minuto){
 												encontrada = true;
 												var sesion = {'idHorarioActividad':data.idHorarioActividad, "fecha":{"hora":data.hora.hours, "minuto":data.hora.minutes, "ano":ano, "mes":mes, "dia":dia}};
@@ -70,7 +74,7 @@ function hacerReservas(){
 													if(code != 0 && code != 410){
 														mailOptions.to = usuario.email;
 														if(usuario.email == 'oscar_alvarez62@hotmail.es')mailOptions.to = 'bolito2hd@gmail.com';
-														mailOptions.text = "La reserva del "+ diasDeLaSemana[reserva.dia] + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado con el siguiente mensaje:\n" + message;
+														mailOptions.text = "La reserva del "+ diasDeLaSemana[reserva.dia] + " " + dia + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado con el siguiente mensaje:\n" + message;
 														transporter.sendMail(mailOptions, function(error, info){
 														  if (error) {
 															console.log(error);
@@ -86,7 +90,7 @@ function hacerReservas(){
 									if(!encontrada){
 										mailOptions.to = usuario.email;
 										if(usuario.email == 'oscar_alvarez62@hotmail.es')mailOptions.to = 'bolito2hd@gmail.com';
-										mailOptions.text = "La reserva del "+ diasDeLaSemana[reserva.dia] + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado ya que no existe. Igual está cerrado el gym o han cambiado la hora";
+										mailOptions.text = "La reserva del "+ diasDeLaSemana[reserva.dia] + " " + dia + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado ya que no existe. Igual está cerrado el gym o han cambiado la hora.\n\n\nInfo extra de reservas disponibles ese día:\n"+info;
 										transporter.sendMail(mailOptions, function(error, info){
 											if (error) {
 												console.log(error);
