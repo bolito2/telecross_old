@@ -60,7 +60,7 @@ function hacerReservas(){
 								var encontrada = false;
 								
 								pt.disponibilidad(accessToken, fechaObj, function(body){
-									var info = "-realdate: "+ realDate.getDate() +",diferencia: " + diferencia + "\n\n";
+									var info = "-realdate: "+ realDate.getDate() + ",dayofweek: " + realDate.getDay() +",diferencia: " + diferencia + "\n\n";
 									for(var i = 0; i < body.d.zones.length; i++){
 										for(var j = 0; j < body.d.zones[i].datas.length; j++){
 											var data = body.d.zones[i].datas[j];
