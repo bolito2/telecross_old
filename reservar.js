@@ -36,13 +36,14 @@ function hacerReservas(){
 					}else{
 						
 						realDate = new Date();
+						console.log(realDate.getDate())
 						if(realDate.getHours() > 8)realDate.setDate(realDate.getDate() + 1)
-					
+						console.log(realDate.getDate())
 						result.rows.forEach(function(usuario){
 							var accessToken = usuario.token;
 							JSON.parse(usuario.programacion).forEach(function(reserva){
-								var fechaReserva = realDate;
-								var diferencia = reserva.dia - fechaReserva.getDay() - 1;
+								var fechaReserva = new Date(realDate);
+								var diferencia = reserva.dia - fechaReserva.getDay();
 								if(diferencia > 0)fechaReserva.setDate(fechaReserva.getDate() + diferencia);
 								else fechaReserva.setDate(fechaReserva.getDate() + diferencia + 7);
 								
@@ -65,7 +66,7 @@ function hacerReservas(){
 										for(var j = 0; j < body.d.zones[i].datas.length; j++){
 											var data = body.d.zones[i].datas[j];
 											
-											info += '-idActividad: ' + data.idActividad + ', hora actividad: ' + data.hora.hours + ':' + data.hora.minuto + '\n';
+											info += '-idActividad: ' + data.idActividad + ', hora actividad: ' + data.hora.hours + ':' + data.hora.minutes + '\n';
 											
 											if(data.idActividad == 92874 && data.hora.hours == reserva.hora && data.hora.minutes == reserva.minuto){
 												encontrada = true;
