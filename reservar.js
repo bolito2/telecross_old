@@ -20,77 +20,85 @@ var mailOptions = {
   text: 'That was easy!'
 };
 
-pg.connect(process.env.DATABASE_URL, function(err, client, done){
-		if(err){
-			console.log("ERROR AL CONECTAR A LA BASE DE DATOS POR LA NIT");
-		}else{
-			client.query("SELECT programacion, token, email FROM reservas WHERE programacion NOT LIKE '[]'", function(err, result){
-				done();
-				if(err){
-					console.log("ERROR AL EFECTUAR LA QUERY DE LA NIT");
-				}else{
-					result.rows.forEach(function(usuario){
-						var accessToken = usuario.token;
-						JSON.parse(usuario.programacion).forEach(function(reserva){
-							var fechaReserva = new Date();
-							var diferencia = reserva.dia - fechaReserva.getDay();
-							if(diferencia > 0)fechaReserva.setDate(fechaReserva.getDate() + diferencia);
-							else fechaReserva.setDate(fechaReserva.getDate() + diferencia + 7);
-							
-							var dia = fechaReserva.getDate();
-							if(dia < 10)dia = '0' + dia.toString();
-							else dia = dia.toString();
-							
-							var mes = fechaReserva.getMonth() + 1;
-							if(mes < 10)mes = '0' + mes.toString();
-							else mes = mes.toString();
-							
-							var ano = fechaReserva.getFullYear().toString();
-							
-							var fechaObj = {"mes":mes,"dia":dia,"ano":ano};
-							var encontrada = false;
-							
-							pt.disponibilidad(accessToken, fechaObj, function(body){
-								for(var i = 0; i < body.d.zones.length; i++){
-									for(var j = 0; j < body.d.zones[i].datas.length; j++){
-										var data = body.d.zones[i].datas[j];
-										if(data.idActividad == 92874 && data.hora.hours == reserva.hora && data.hora.minutes == reserva.minuto){
-											encontrada = true;
-											var sesion = {'idHorarioActividad':data.idHorarioActividad, "fecha":{"hora":data.hora.hours, "minuto":data.hora.minutes, "ano":ano, "mes":mes, "dia":dia}};
-											pt.reservarCB(function(code, message){
-												if(code != 0 && code != 410){
-													mailOptions.to = usuario.email;
-													if(usuario.email == 'oscar_alvarez62@hotmail.es')mailOptions.to = 'bolito2hd@gmail.com';
-													mailOptions.text = "La reserva del "+ diasDeLaSemana[reserva.dia] + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado con el siguiente mensaje:\n" + message;
-													transporter.sendMail(mailOptions, function(error, info){
-													  if (error) {
-														console.log(error);
-													  } else {
-														console.log('Email sent: ' + info.response);
-													  }
-													});
-												}
-											}, sesion, accessToken);
+setTimeout(hacerReservas, Math.floor(Math.random()*30000) + 30000)
+
+function hacerReservas(){
+	pg.connect(process.env.DATABASE_URL, function(err, client, done){
+			if(err){
+				console.log("ERROR AL CONECTAR A LA BASE DE DATOS POR LA NIT");
+			}else{
+				client.query("SELECT programacion, token, email FROM reservas WHERE programacion NOT LIKE '[]'", function(err, result){
+					done();
+					if(err){
+						console.log("ERROR AL EFECTUAR LA QUERY DE LA NIT");
+					}else{
+						
+						realDate = new Date();
+						if(realDate.getHours() > 8)realDate.setDate(realDate.getDate() + 1)
+						
+						result.rows.forEach(function(usuario){
+							var accessToken = usuario.token;
+							JSON.parse(usuario.programacion).forEach(function(reserva){
+								var fechaReserva = realDate;
+								var diferencia = reserva.dia - fechaReserva.getDay();
+								if(diferencia > 0)fechaReserva.setDate(fechaReserva.getDate() + diferencia);
+								else fechaReserva.setDate(fechaReserva.getDate() + diferencia + 7);
+								
+								var dia = fechaReserva.getDate();
+								if(dia < 10)dia = '0' + dia.toString();
+								else dia = dia.toString();
+								
+								var mes = fechaReserva.getMonth() + 1;
+								if(mes < 10)mes = '0' + mes.toString();
+								else mes = mes.toString();
+								
+								var ano = fechaReserva.getFullYear().toString();
+								
+								var fechaObj = {"mes":mes,"dia":dia,"ano":ano};
+								var encontrada = false;
+								
+								pt.disponibilidad(accessToken, fechaObj, function(body){
+									for(var i = 0; i < body.d.zones.length; i++){
+										for(var j = 0; j < body.d.zones[i].datas.length; j++){
+											var data = body.d.zones[i].datas[j];
+											if(data.idActividad == 92874 && data.hora.hours == reserva.hora && data.hora.minutes == reserva.minuto){
+												encontrada = true;
+												var sesion = {'idHorarioActividad':data.idHorarioActividad, "fecha":{"hora":data.hora.hours, "minuto":data.hora.minutes, "ano":ano, "mes":mes, "dia":dia}};
+												pt.reservarCB(function(code, message){
+													if(code != 0 && code != 410){
+														mailOptions.to = usuario.email;
+														if(usuario.email == 'oscar_alvarez62@hotmail.es')mailOptions.to = 'bolito2hd@gmail.com';
+														mailOptions.text = "La reserva del "+ diasDeLaSemana[reserva.dia] + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado con el siguiente mensaje:\n" + message;
+														transporter.sendMail(mailOptions, function(error, info){
+														  if (error) {
+															console.log(error);
+														  } else {
+															console.log('Email sent: ' + info.response);
+														  }
+														});
+													}
+												}, sesion, accessToken);
+											}
 										}
 									}
-								}
-								if(!encontrada){
-									mailOptions.to = usuario.email;
-									if(usuario.email == 'oscar_alvarez62@hotmail.es')mailOptions.to = 'bolito2hd@gmail.com';
-									mailOptions.text = "La reserva del "+ diasDeLaSemana[reserva.dia] + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado ya que no existe. Igual está cerrado el gym o han cambiado la hora";
-									transporter.sendMail(mailOptions, function(error, info){
-										if (error) {
-											console.log(error);
-										} else {
-											console.log('Email sent: ' + info.response);
-										}
-									});
-								}
+									if(!encontrada){
+										mailOptions.to = usuario.email;
+										if(usuario.email == 'oscar_alvarez62@hotmail.es')mailOptions.to = 'bolito2hd@gmail.com';
+										mailOptions.text = "La reserva del "+ diasDeLaSemana[reserva.dia] + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado ya que no existe. Igual está cerrado el gym o han cambiado la hora";
+										transporter.sendMail(mailOptions, function(error, info){
+											if (error) {
+												console.log(error);
+											} else {
+												console.log('Email sent: ' + info.response);
+											}
+										});
+									}
+								});
 							});
 						});
-					});
-					console.log("Reservas acabadas");
-				}
-			});
-		}
-	});
+						console.log("Reservas acabadas");
+					}
+				});
+			}
+		});
+}
