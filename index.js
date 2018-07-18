@@ -11,7 +11,7 @@ app
 	.listen(PORT, () => console.log(`Listening on ${ PORT }`));
 	
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/', function(req, res){
 	res.render('index');
