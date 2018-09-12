@@ -21,7 +21,8 @@ var mailOptions = {
 };
 
 console.log("SCHEDULING RESERVAS")
-setTimeout(hacerReservas, Math.floor(Math.random()*30000) + 30000)
+//setTimeout(hacerReservas, Math.floor(Math.random()*30000) + 30000)
+hacerReservas();
 
 function hacerReservas(){
 	console.log("EMPEZANDO RESERVAS");
