@@ -99,7 +99,7 @@ function hacerReservas(){
 														mailOptions[usuario.email].text += "La reserva del "+ diasDeLaSemana[reserva.dia] + " " + dia + " a las " + reserva.hora + ":" + reserva.minuto +" ha se ha realizado correctamente con el siguiente mensaje:\n" + message + "\n_______________________\n\n";
 													}
 													console.log(reservas_index[usuario.email])
-													if(reservas_index[usuario.email] == reservas_parsed.length - 1 && reservas_fallidas[usuario.email] > 0){
+													if(reservas_index[usuario.email] == reservas_parsed.length - 1){
 															console.log("fc: " + reservas_fallidas[usuario.email].toString())
 															
 															mailOptions[usuario.email].text = "RESERVAS FALLIDAS: \n\n" + mailOptions[usuario.email].text;
