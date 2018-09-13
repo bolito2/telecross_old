@@ -17,7 +17,21 @@ var mailOptions = []
 
 console.log("SCHEDULING RESERVAS")
 //setTimeout(hacerReservas, Math.floor(Math.random()*30000) + 30000)
-hacerReservas();
+
+var exact_min = 0
+var exact_sec = 0
+
+checkTime();
+
+function checkTime(){
+	let date = new Date();
+	if(date.getMinutes() == exact_min && date.getSeconds() == exact_sec){
+		hacerReservas();
+	}
+	else setTimeout(checkTime, 500);
+}
+
+
 
 function hacerReservas(){
 	console.log("EMPEZANDO RESERVAS");
