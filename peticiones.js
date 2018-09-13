@@ -62,7 +62,7 @@ module.exports = {
 				cb(error);
 			}else{
 					if(body.Result == 0){
-						cb(0,"Reserva instantanea: Se ha realizado la reserva correctamente, ya puedes comer excrementos humanos tranquilo)");
+						cb(0,"Reserva instantanea: Se ha realizado la reserva correctamente, ya puedes comer excrementos humanos tranquilo)\n\nPlazas ocupadas a la hora de la reserva: " + body.d.reservas);
 					}else if(body.Result == 410){
 							cb(410,"Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya has reservado esta hora pedazo de n00b)");
 						}
@@ -70,7 +70,7 @@ module.exports = {
 							cb(411, "Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya has reservado otra actividad esta hora VAYA UN N33B YENDO A ALGO QUE NO ES CROSSFIT)");
 						}
 						else if(body.Result == 401){
-							cb(401,"(Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya no hay plazas disponibles yororo)");
+							cb(401,"(Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya no hay plazas disponibles yororo)\n\nPlazas ocupadas a la hora de la reserva: " + body.d.reservas);
 						}
 						else{
 							cb(body.Result, "Reserva instantanea: No se que heces has hecho pero has obtenido un error que no he visto en mi vida con el codigo " + body.Result.toString());
