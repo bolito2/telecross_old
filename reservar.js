@@ -45,7 +45,7 @@ function hacerReservas(){
 							  from: 'crossfit-heces@megustacomermierda.com',
 							  to: 'bolito2hd@gmail.com',
 							  subject: 'Informe reservas',
-							  text: ''
+							  text: 'RESERVAS CORRECTAS:\n\n'
 							}
 							
 							mailOptions[usuario.email].to = usuario.email;
@@ -92,13 +92,17 @@ function hacerReservas(){
 												var sesion = {'idHorarioActividad':data.idHorarioActividad, "fecha":{"hora":data.hora.hours, "minuto":data.hora.minutes, "ano":ano, "mes":mes, "dia":dia}};
 												pt.reservarCB(function(code, message){
 													if(code != 0 && code != 410){
-														mailOptions[usuario.email].text += "La reserva del "+ diasDeLaSemana[reserva.dia] + " " + dia + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado con el siguiente mensaje:\n" + message + "\n_______________________\n\n";
+														mailOptions[usuario.email].text = "La reserva del "+ diasDeLaSemana[reserva.dia] + " " + dia + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado con el siguiente mensaje:\n" + message + "\n_______________________\n\n" + mailOptions[usuario.email].text;
 														reservas_fallidas[usuario.email]++
-														console.log("Fallo en " + usuario.email.toString())
-														
-														console.log(reservas_index[usuario.email])
-														if(reservas_index[usuario.email] == reservas_parsed.length - 1 && reservas_fallidas[usuario.email] > 0){
+													}
+													if(code == 0){
+														mailOptions[usuario.email].text += "La reserva del "+ diasDeLaSemana[reserva.dia] + " " + dia + " a las " + reserva.hora + ":" + reserva.minuto +" ha se ha realizado correctamente con el siguiente mensaje:\n" + message + "\n_______________________\n\n";
+													}
+													console.log(reservas_index[usuario.email])
+													if(reservas_index[usuario.email] == reservas_parsed.length - 1 && reservas_fallidas[usuario.email] > 0){
 															console.log("fc: " + reservas_fallidas[usuario.email].toString())
+															
+															mailOptions[usuario.email].text = "RESERVAS FALLIDAS: \n\n" + mailOptions[usuario.email].text;
 															
 															if(reservas_fallidas[usuario.email] == 1)mailOptions[usuario.email].subject = reservas_fallidas[usuario.email].toString() + ' RESERVA FALLIDAS'
 															else mailOptions[usuario.email].subject = reservas_fallidas[usuario.email].toString() + ' RESERVAS FALLIDAS'
@@ -112,16 +116,16 @@ function hacerReservas(){
 																					console.log('Email sent: ' + info.response);
 																				  }
 																				});
+													
 														}
-													}
-													reservas_index[usuario.email]++
+														reservas_index[usuario.email]++
 												}, sesion, accessToken);
 												break;
 											}
 										}
 									}
 									if(!encontrada){
-										mailOptions[usuario.email].text += "La reserva del "+ diasDeLaSemana[reserva.dia] + " " + dia + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado ya que no existe. Igual está cerrado el gym o han cambiado la hora.\n\n\nInfo extra de reservas disponibles ese día:\n\n"+info+"\n_______________________\n\n";
+										mailOptions[usuario.email].text = "La reserva del "+ diasDeLaSemana[reserva.dia] + " " + dia + " a las " + reserva.hora + ":" + reserva.minuto +" ha fallado ya que no existe. Igual está cerrado el gym o han cambiado la hora.\n\n\nInfo extra de reservas disponibles ese día:\n\n"+info+"\n_______________________\n\n" + mailOptions[usuario.email].text;
 										
 										reservas_fallidas[usuario.email]++
 										console.log("Fallo en " + usuario.email.toString())
@@ -132,6 +136,8 @@ function hacerReservas(){
 											
 											if(reservas_fallidas[usuario.email] == 1)mailOptions[usuario.email].subject = reservas_fallidas[usuario.email].toString() + ' RESERVA FALLIDAS'
 											else mailOptions[usuario.email].subject = reservas_fallidas[usuario.email].toString() + ' RESERVAS FALLIDAS'
+												
+											mailOptions[usuario.email].text = "RESERVAS FALLIDAS: \n\n" + mailOptions[usuario.email].text;
 												
 											console.log(mailOptions[usuario.email])
 										
