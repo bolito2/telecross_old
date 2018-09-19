@@ -13,7 +13,7 @@ var transporter = nodemailer.createTransport({
 		}
 	});
 
-var debug = true
+var debug = false
 
 console.log("SCHEDULING RESERVAS")
 
