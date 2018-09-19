@@ -167,10 +167,10 @@ function toFechaObj(fecha){
 }
 
 
-function reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, mandar_email) {
-	console.log("-Empezando reserva para " + usuario.email.toString() + " a los " + new Date().getSeconds() + ":" + new Date().getMilliseconds());
-	
+function reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, mandar_email) {	
 	if(mandar_email){
+		console.log("-Empezando reserva para " + usuario.email.toString() + " a los " + new Date().getSeconds() + ":" + new Date().getMilliseconds());
+		
 		//Pasar la fecha a la semana siguiente
 		let fechaReserva = new Date(parseInt(sesion.fecha.ano), parseInt(sesion.fecha.mes) - 1, parseInt(sesion.fecha.dia), 0, 0, 0, 0)
 		fechaReserva.setDate(fechaReserva.getDate() + 7)
@@ -180,8 +180,6 @@ function reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, mandar_
 		sesion.fecha.ano = fechaReserva.getFullYear()
 	}
 	
-	console.log(sesion)
-	
 	pt.reservarCB(function (code, message) {
 		if (code != 0 && code != 410) {
 			mailOptions[usuario.email].text += "La reserva del dia " + sesion.fecha.dia + " a las " + sesion.fecha.hora + ":" + sesion.fecha.minuto + " ha fallado con el siguiente mensaje:\n" + message + "\n_____________________________\n\n";
@@ -189,7 +187,7 @@ function reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, mandar_
 			reservas_fallidas[usuario.email]++
 		}
 		if (code == 0) {
-			mailOptions[usuario.email].text = "RESERVAS CORRECTAS:\n\nLa reserva del dia " + sesion.fecha.dia + " a las " + sesion.fecha.hora + ":" + sesion.fecha.minuto + " se ha realizado correctamente con el siguiente mensaje:\n" + message + "\n_____________________________\n\n" + mailOptions[usuario.email].text;
+			mailOptions[usuario.email].text += "RESERVAS CORRECTAS:\n\nLa reserva del dia " + sesion.fecha.dia + " a las " + sesion.fecha.hora + ":" + sesion.fecha.minuto + " se ha realizado correctamente con el siguiente mensaje:\n" + message + "\n_____________________________\n\n";
 		}
 		if (mandar_email) {
 			console.log("-Reservas acabadas para " + usuario.email.toString() + "a los " + new Date().getSeconds() + ":" + new Date().getMilliseconds());

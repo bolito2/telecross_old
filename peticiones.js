@@ -63,6 +63,8 @@ module.exports = {
 			}else{
 					if(body.Result == 0){
 						cb(0,"Reserva instantanea: Se ha realizado la reserva correctamente, ya puedes comer excrementos humanos tranquilo)\n\nPlazas ocupadas a la hora de la reserva: " + body.d.reservas);
+						
+						console.log(body.d);
 					}else if(body.Result == 410){
 							cb(410,"Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya has reservado esta hora pedazo de n00b)");
 						}
