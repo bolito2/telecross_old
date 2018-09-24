@@ -56,7 +56,7 @@ function getWaitTime(exact_min) {
 var realDate;
 
 function disponibilidadLoop(fechaObj, sesion, usuario, reservas_fallidas, mailOptions){
-	if(new Date().getSeconds() == 59 || new Date().getSeconds() == 0){
+	if(new Date().getSeconds() == 59 && new Date().getMinutes() == exact_min + 2){
 		console.log("<---No se ha podido reservar antes de las 12--->");
 		return;
 	}
@@ -64,11 +64,7 @@ function disponibilidadLoop(fechaObj, sesion, usuario, reservas_fallidas, mailOp
 	pt.disponibilidad(usuario.token, fechaObj, function (body) {
 		if(body.d.zones.length > 0){
 			console.log("<---Encontrada disponibilidad antes de tiempo--->")
-			
-			//Preparar variables
-			nextWeekSesion(sesion)
-
-			reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, 2)
+			reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, 1)
 		}
 		else
 			setTimeout(disponibilidadLoop, wait_time*10, fechaObj, sesion, usuario, reservas_fallidas, mailOptions)
@@ -147,7 +143,9 @@ function verDisponibilidad() {
 													};
 
 													if (parseInt(sesion.fecha.dia) == realDate.getDate()){
-														setTimeout(reservarSesion, getWaitTime(exact_min + 1) - 1000, sesion, usuario, reservas_fallidas, mailOptions, 2 + Math.ceil(1500.0/wait_time))
+														nextWeekSesion(sesion)
+														
+														setTimeout(reservarSesion, getWaitTime(exact_min + 3) - 1000, sesion, usuario, reservas_fallidas, mailOptions, 2 + Math.ceil(1500.0/wait_time))
 														fechaReserva.setDate(fechaReserva.getDate() + 7)
 														 
 														setTimeout(disponibilidadLoop, 1500, toFechaObj(fechaReserva), sesion, usuario, reservas_fallidas, mailOptions);
@@ -205,13 +203,7 @@ function nextWeekSesion(sesion){
 
 //modo; 0->reserva repetida, 1->reserva anticipada, 2->reserva nueva con mail, 3-inf->reserva nueva sin mail
 function reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, modo) {	
-	if(modo > 1){
-		console.log("Empezando reserva para " + usuario.email.toString() + " a los " + new Date().getSeconds() + ":" + new Date().getMilliseconds());
-		
-		//Pasar la fecha a la semana siguiente
-		nextWeekSesion(sesion)
-	}
-	
+	console.log("Empezando reserva para " + usuario.email.toString() + " a los " + new Date().getSeconds() + ":" + new Date().getMilliseconds());
 	
 	pt.reservarCB(function (code, message) {
 		if (code != 0 && code != 410 && (modo == 0 || modo == 2)) {
