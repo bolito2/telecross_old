@@ -203,9 +203,9 @@ function nextWeekSesion(sesion){
 	sesion.fecha.ano = fechaReserva.getFullYear()
 }
 
-//modo; 0->reserva repetida, 1-inf->reserva nueva, 2->reserva nueva con mail
+//modo; 0->reserva repetida, 1->reserva anticipada, 2->reserva nueva con mail, 3-inf->reserva nueva sin mail
 function reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, modo) {	
-	if(modo > 0){
+	if(modo > 1){
 		console.log("Empezando reserva para " + usuario.email.toString() + " a los " + new Date().getSeconds() + ":" + new Date().getMilliseconds());
 		
 		//Pasar la fecha a la semana siguiente
