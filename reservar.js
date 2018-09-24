@@ -13,16 +13,21 @@ var transporter = nodemailer.createTransport({
 		}
 	});
 
-var debug = false
+var debug = process.env.debug
 
 console.log("SCHEDULING RESERVAS")
 
-var exact_min = 59
+var exact_min = parseInt(process.env.exact_min)
+var wait_time = 50
 
-checkTime(exact_min);
-	
-if (debug)
+if(debug){
 	console.log("DEBUG")
+	
+	exact_min = new Date().getMinutes();
+	verDisponibilidad()
+}else{
+	checkTime(exact_min);
+}
 
 function checkTime(exact_min) {
 	if (new Date().getMinutes() == exact_min)
@@ -35,7 +40,7 @@ function checkTime(exact_min) {
 function getWaitTime(exact_min) {
 	let date = new Date()
 	
-	if (exact_min == 0)
+	if (exact_min%60 == 0)
 		date.setHours(date.getHours() + 1)
 	
 	date.setMinutes(exact_min % 60)
@@ -49,6 +54,26 @@ function getWaitTime(exact_min) {
 
 //Fecha real española
 var realDate;
+
+function disponibilidadLoop(fechaObj, sesion, usuario, reservas_fallidas, mailOptions){
+	if(new Date().getSeconds() == 59 || new Date().getSeconds() == 0){
+		console.log("<---No se ha podido reservar antes de las 12--->");
+		return;
+	}
+	
+	pt.disponibilidad(usuario.token, fechaObj, function (body) {
+		if(body.d.zones.length > 0){
+			console.log("<---Encontrada disponibilidad antes de tiempo--->")
+			
+			//Preparar variables
+			nextWeekSesion(sesion)
+
+			reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, 2)
+		}
+		else
+			setTimeout(disponibilidadLoop, wait_time*10, fechaObj, sesion, usuario, reservas_fallidas, mailOptions)
+	})
+}
 
 function verDisponibilidad() {
 	console.log("Conectando a base de datos");
@@ -122,10 +147,13 @@ function verDisponibilidad() {
 													};
 
 													if (parseInt(sesion.fecha.dia) == realDate.getDate()){
-														setTimeout(reservarSesion, getWaitTime(0), sesion, usuario, reservas_fallidas, mailOptions, true)
+														setTimeout(reservarSesion, getWaitTime(exact_min + 1) - 1000, sesion, usuario, reservas_fallidas, mailOptions, 2 + Math.ceil(1500.0/wait_time))
+														fechaReserva.setDate(fechaReserva.getDate() + 7)
+														 
+														setTimeout(disponibilidadLoop, 1500, toFechaObj(fechaReserva), sesion, usuario, reservas_fallidas, mailOptions);
 													}
 													else
-														reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, false)
+														reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, 0)
 													break;
 												}
 											}
@@ -166,31 +194,38 @@ function toFechaObj(fecha){
 	};
 }
 
+function nextWeekSesion(sesion){
+	let fechaReserva = new Date(parseInt(sesion.fecha.ano), parseInt(sesion.fecha.mes) - 1, parseInt(sesion.fecha.dia), 0, 0, 0, 0)
+	fechaReserva.setDate(fechaReserva.getDate() + 7)
+		
+	sesion.fecha.dia = fechaReserva.getDate()
+	sesion.fecha.mes = fechaReserva.getMonth() + 1
+	sesion.fecha.ano = fechaReserva.getFullYear()
+}
 
-function reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, mandar_email) {	
-	if(mandar_email){
-		console.log("-Empezando reserva para " + usuario.email.toString() + " a los " + new Date().getSeconds() + ":" + new Date().getMilliseconds());
+//modo; 0->reserva repetida, 1-inf->reserva nueva, 2->reserva nueva con mail
+function reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, modo) {	
+	if(modo > 0){
+		console.log("Empezando reserva para " + usuario.email.toString() + " a los " + new Date().getSeconds() + ":" + new Date().getMilliseconds());
 		
 		//Pasar la fecha a la semana siguiente
-		let fechaReserva = new Date(parseInt(sesion.fecha.ano), parseInt(sesion.fecha.mes) - 1, parseInt(sesion.fecha.dia), 0, 0, 0, 0)
-		fechaReserva.setDate(fechaReserva.getDate() + 7)
-		
-		sesion.fecha.dia = fechaReserva.getDate()
-		sesion.fecha.mes = fechaReserva.getMonth() + 1
-		sesion.fecha.ano = fechaReserva.getFullYear()
+		nextWeekSesion(sesion)
 	}
 	
+	
 	pt.reservarCB(function (code, message) {
-		if (code != 0 && code != 410) {
+		if (code != 0 && code != 410 && (modo == 0 || modo == 2)) {
 			mailOptions[usuario.email].text += "La reserva del dia " + sesion.fecha.dia + " a las " + sesion.fecha.hora + ":" + sesion.fecha.minuto + " ha fallado con el siguiente mensaje:\n" + message + "\n_____________________________\n\n";
 			
 			reservas_fallidas[usuario.email]++
 		}
 		if (code == 0) {
 			mailOptions[usuario.email].text += "RESERVAS CORRECTAS:\n\nLa reserva del dia " + sesion.fecha.dia + " a las " + sesion.fecha.hora + ":" + sesion.fecha.minuto + " se ha realizado correctamente con el siguiente mensaje:\n" + message + "\n_____________________________\n\n";
+			
+			if(modo != 0)modo = 2;
 		}
-		if (mandar_email) {
-			console.log("-Reservas acabadas para " + usuario.email.toString() + "a los " + new Date().getSeconds() + ":" + new Date().getMilliseconds());
+		if (modo == 2) {
+			console.log("<---Reservas acabadas para " + usuario.email.toString() + "a los " + new Date().getSeconds() + ":" + new Date().getMilliseconds() + "--->");
 
 			if(reservas_fallidas[usuario.email] > 0)
 				mailOptions[usuario.email].text = "RESERVAS FALLIDAS: \n\n" + mailOptions[usuario.email].text;
@@ -210,5 +245,17 @@ function reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, mandar_
 				});
 			}
 		}
+		
 	}, sesion, usuario.token);
+	
+	if (modo == 2){
+		console.log("<---Las cartas están echadas para " + usuario.email + "--->");
+		return;
+	}
+		
+	
+	if(modo > 2){
+		modo -= 1
+		setTimeout(reservarSesion, wait_time, sesion, usuario, reservas_fallidas, mailOptions, modo)
+	}
 }

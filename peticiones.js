@@ -62,9 +62,9 @@ module.exports = {
 				cb(error);
 			}else{
 					if(body.Result == 0){
-						cb(0,"Reserva instantanea: Se ha realizado la reserva correctamente, ya puedes comer excrementos humanos tranquilo)\n\nPlazas ocupadas a la hora de la reserva: " + body.d.reservas);
+						cb(0,"Reserva instantanea: Se ha realizado la reserva correctamente, ya puedes comer excrementos humanos tranquilo)\n\nPlazas ocupadas a la hora de la reserva: " + body.d.horario.reservas);
 						
-						console.log(body.d);
+						console.log(body.d.horario.reservas);
 					}else if(body.Result == 410){
 							cb(410,"Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya has reservado esta hora pedazo de n00b)");
 						}
