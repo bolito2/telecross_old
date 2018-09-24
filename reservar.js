@@ -13,11 +13,9 @@ var transporter = nodemailer.createTransport({
 		}
 	});
 
-var debug = process.env.debug
-
-console.log("SCHEDULING RESERVAS")
-
+var debug = (process.env.debug == 'true')
 var exact_min = parseInt(process.env.exact_min)
+
 var wait_time = 50
 
 if(debug){
@@ -28,6 +26,8 @@ if(debug){
 }else{
 	checkTime(exact_min);
 }
+
+console.log("SCHEDULING RESERVAS WITH EXACT_MIN = " + exact_min.toString())
 
 function checkTime(exact_min) {
 	if (new Date().getMinutes() == exact_min)
