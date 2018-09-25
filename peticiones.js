@@ -62,20 +62,20 @@ module.exports = {
 				cb(error);
 			}else{
 					if(body.Result == 0){
-						cb(0,"Reserva instantanea: Se ha realizado la reserva correctamente, ya puedes comer excrementos humanos tranquilo)\n\nPlazas ocupadas a la hora de la reserva: " + body.d.horario.reservas);
+						cb(0,"Todo bien. Plazas restantes: " + (12 - body.d.horario.reservas).toString() + "\n");
 						
 						console.log(body.d.horario.reservas);
 					}else if(body.Result == 410){
-							cb(410,"Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya has reservado esta hora pedazo de n00b)");
+							cb(410,"Hora ya reservada(410)\n");
 						}
 						else if(body.Result == 411){
-							cb(411, "Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya has reservado otra actividad esta hora VAYA UN N33B YENDO A ALGO QUE NO ES CROSSFIT)");
+							cb(411, "Hay otra actividad reservada ese día(411)\n");
 						}
 						else if(body.Result == 401){
-							cb(401,"(Reserva instantanea: Me cago en mis putos excrementos ha habido un error con el codigo " + body.Result.toString() + " que creo que significa que ya no hay plazas disponibles yororo)\n\nPlazas ocupadas a la hora de la reserva: " + body.d.reservas);
+							cb(401,"No quedan plazas(401)\n");
 						}
 						else{
-							cb(body.Result, "Reserva instantanea: No se que heces has hecho pero has obtenido un error que no he visto en mi vida con el codigo " + body.Result.toString());
+							cb(body.Result, "No se que heces has hecho pero has obtenido un error que no he visto en mi vida con el codigo " + body.Result.toString() + "\n");
 						}
 				}
 		});

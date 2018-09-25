@@ -3,7 +3,7 @@ var pt = require('./peticiones')
 
 var nodemailer = require('nodemailer')
 
-var diasDeLaSemana = ['sudapo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+var diasDeLaSemana = ['HECES', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'];
 
 var transporter = nodemailer.createTransport({
 		service: 'Mailgun',
@@ -14,64 +14,49 @@ var transporter = nodemailer.createTransport({
 	});
 
 var debug = (process.env.debug == 'true')
-var exact_min = parseInt(process.env.exact_min)
+var antelacion = parseInt(process.env.antelacion)
 
-var wait_time = 50
+var wait_time = 1000
 
-if(debug){
+console.log("SCHEDULING RESERVAS WITH ANTELACION = " + antelacion.toString())
+
+if (debug) {
 	console.log("DEBUG")
-	
-	exact_min = new Date().getMinutes();
-	verDisponibilidad()
-}else{
-	checkTime(exact_min);
+
+	preparativos()
+} else {
+	checkTime(antelacion);
 }
 
-console.log("SCHEDULING RESERVAS WITH EXACT_MIN = " + exact_min.toString())
-
-function checkTime(exact_min) {
-	if (new Date().getMinutes() == exact_min)
-		verDisponibilidad()
-	else{
-		setTimeout(checkTime, 3000, exact_min);
+	
+function checkTime(antelacion) {
+	if (new Date().getMinutes() == (60 - antelacion)%60){
+		preparativos()
+	}
+	else {
+		setTimeout(checkTime, wait_time*3, antelacion);
 	}
 }
 
 function getWaitTime(exact_min) {
 	let date = new Date()
-	
-	if (exact_min%60 == 0)
+
+	if (exact_min % 60 == 0)
 		date.setHours(date.getHours() + 1)
-	
-	date.setMinutes(exact_min % 60)
-	date.setSeconds(0)
-	date.setMilliseconds(0)
 
-	console.log(date)
+		date.setMinutes(exact_min % 60)
+		date.setSeconds(0)
+		date.setMilliseconds(0)
 
-	return date - new Date();
+		console.log(date)
+
+		return date - new Date();
 }
 
 //Fecha real española
 var realDate;
 
-function disponibilidadLoop(fechaObj, sesion, usuario, reservas_fallidas, mailOptions){
-	if(new Date().getSeconds() == 59 && new Date().getMinutes() == exact_min + 2){
-		console.log("<---No se ha podido reservar antes de las 12--->");
-		return;
-	}
-	
-	pt.disponibilidad(usuario.token, fechaObj, function (body) {
-		if(body.d.zones.length > 0){
-			console.log("<---Encontrada disponibilidad antes de tiempo--->")
-			reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, 1)
-		}
-		else
-			setTimeout(disponibilidadLoop, wait_time*10, fechaObj, sesion, usuario, reservas_fallidas, mailOptions)
-	})
-}
-
-function verDisponibilidad() {
+function preparativos() {
 	console.log("Conectando a base de datos");
 	pg.connect(process.env.DATABASE_URL, function (err, client, done) {
 		if (err) {
@@ -86,91 +71,156 @@ function verDisponibilidad() {
 					realDate = new Date();
 					if (realDate.getHours() > 8)
 						realDate.setDate(realDate.getDate() + 1)
-						console.log("Real date: " + realDate.getDate())
+					
+					console.log("Real date: " + realDate.getDate())
+						
+					result.rows.forEach(function (usuario) {
+						//Reservas de cada usuario
+						var reservas = []
+						
+						//Mail de cada usuario
+						var mailOptions = {
+							from: 'crossfit-heces@megustacomermierda.com',
+							to: usuario.email,
+							subject: 'Informe reservas',
+							text: ''
+						}
+						//Lol
+						if (usuario.email == 'oscar_alvarez62@hotmail.es'){
+							mailOptions.to = 'bolito2hd@gmail.com';
+						}
 
-						var reservas_fallidas = []
-						var mailOptions = []
+						//Número de fallos por usuario
+						var reservas_fallidas = {'num': 0}
 
-						result.rows.forEach(function (usuario) {
-							mailOptions[usuario.email] = {
-								from: 'crossfit-heces@megustacomermierda.com',
-								to: 'bolito2hd@gmail.com',
-								subject: 'Informe reservas',
-								text: ''
+						//Preparar fecha de cada reserva
+						JSON.parse(usuario.programacion).forEach(function (reserva) {
+							var fechaReserva = new Date(realDate);
+							let diferencia = reserva.dia - fechaReserva.getDay();
+							if (diferencia > 0)
+								fechaReserva.setDate(fechaReserva.getDate() + diferencia);
+							else
+								fechaReserva.setDate(fechaReserva.getDate() + diferencia + 7);
+
+							let fechaObj = toFechaObj(fechaReserva)
+
+							reservas[diferencia + 10] = {
+								'hora': reserva.hora,
+								'minuto': reserva.minuto,
+								"fechaObj": fechaObj,
+								'dayOfWeek': fechaReserva.getDay()
 							}
-
-							mailOptions[usuario.email].to = usuario.email;
-							if (usuario.email == 'oscar_alvarez62@hotmail.es')
-								mailOptions[usuario.email].to = 'bolito2hd@gmail.com';
-
-							//Inicializar
-							reservas_fallidas[usuario.email] = 0
-
-								JSON.parse(usuario.programacion).forEach(function (reserva) {
-									var fechaReserva = new Date(realDate);
-									var diferencia = reserva.dia - fechaReserva.getDay();
-									if (diferencia >= 0)
-										fechaReserva.setDate(fechaReserva.getDate() + diferencia);
-									else
-										fechaReserva.setDate(fechaReserva.getDate() + diferencia + 7);
-
-									var fechaObj = toFechaObj(fechaReserva)
-									
-									var encontrada = false;
-									
-									pt.disponibilidad(usuario.token, fechaObj, function (body) {
-										var info = "-realdate: " + realDate.getDate() + ",dayofweek: " + realDate.getDay() + ",diferencia: " + diferencia + ", idCrossfit: 92874\n\n";
-
-										for (var i = 0; i < body.d.zones.length; i++) {
-											for (var j = 0; j < body.d.zones[i].datas.length; j++) {
-												var data = body.d.zones[i].datas[j];
-												
-												info += '-idActividad: ' + data.idActividad + ', hora actividad: ' + data.hora.hours + ':' + data.hora.minutes + '\n';
-
-												//Hay cross a esta hora
-												if (data.idActividad == 92874 && data.hora.hours == reserva.hora && data.hora.minutes == reserva.minuto) {
-													encontrada = true
-													
-													var sesion = {
-														'idHorarioActividad': data.idHorarioActividad,
-														"fecha": {
-															"hora": data.hora.hours,
-															"minuto": data.hora.minutes,
-															"ano": data.yearSelected,
-															"mes": data.monthSelected,
-															"dia": data.daySelected
-														}
-													};
-
-													if (parseInt(sesion.fecha.dia) == realDate.getDate()){
-														nextWeekSesion(sesion)
-														
-														setTimeout(reservarSesion, getWaitTime(exact_min + 3) - 1000, sesion, usuario, reservas_fallidas, mailOptions, 2 + Math.ceil(1500.0/wait_time))
-														fechaReserva.setDate(fechaReserva.getDate() + 7)
-														 
-														setTimeout(disponibilidadLoop, 1500, toFechaObj(fechaReserva), sesion, usuario, reservas_fallidas, mailOptions);
-													}
-													else
-														reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, 0)
-													break;
-												}
-											}
-										}
-										if (!encontrada) {
-											mailOptions[usuario.email].text += "La reserva del dia " + sesion.fecha.dia + " a las " + sesion.fecha.hora + ":" + sesion.fecha.minuto + " ha fallado ya que no existe. Igual está cerrado el gym o han cambiado la hora.\n\n\nInfo extra de reservas disponibles ese día:\n\n" + info + "\n_____________________________\n\n";
-
-											reservas_fallidas[usuario.email]++
-										}
-									});
-								});
 						});
+						if(reservas[10] == null || reservas[10] == undefined){
+							comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions)
+						}	
+						else{
+							disponibilidadLoop(usuario, reservas, reservas_fallidas, mailOptions)
+						}
+					})
 				}
-			});
+			})
 		}
-	});
+	})
 }
 
-function toFechaObj(fecha){
+function disponibilidadLoop(usuario, reservas, reservas_fallidas, mailOptions) {
+	//TODO: Protección cambio de horario
+	/*
+	if (new Date().getSeconds() == 59 && new Date().getMinutes() == exact_min + 2) {
+		console.log("<---No se ha podido reservar antes de las 12--->");
+		return;
+	}
+	*/
+	console.log(usuario.email)
+
+	pt.disponibilidad(usuario.token, reservas[10].fechaObj, function (body) {
+		if (body.d.zones.length > 0) {
+			console.log("<---Encontrada disponibilidad--->")
+			comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions)
+		}else{
+			setTimeout(disponibilidadLoop, wait_time, usuario, reservas, reservas_fallidas, mailOptions)
+		}
+	})
+}
+function comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions){
+	reservas.forEach(function(reserva){
+		
+		pt.disponibilidad(usuario.token, reserva.fechaObj, function (body) {
+			let encontrada = false
+			let last_option = 'nada'
+			
+			for (var i = 0; i < body.d.zones.length; i++) {
+				for (var j = 0; j < body.d.zones[i].datas.length; j++) {
+					var data = body.d.zones[i].datas[j];
+					//Hay cross a esta hora
+					if (data.idActividad == 92874){
+						let sesion = {
+							'idHorarioActividad': data.idHorarioActividad,
+							"fecha": {
+								"hora": data.hora.hours,
+								"minuto": data.hora.minutes,
+								"ano": data.yearSelected,
+								"mes": data.monthSelected,
+								"dia": data.daySelected
+							}
+						};
+						last_option = sesion
+						
+						if(data.hora.hours == reserva.hora && data.hora.minutes == reserva.minuto) {
+							encontrada = true
+							
+							reservarSesion(usuario, reserva, reservas_fallidas, mailOptions, sesion)
+							//RESERVAR TODO
+						}
+					} 
+				}
+			}
+			if (!encontrada) {
+				mailOptions.text += "La reserva del dia " + reserva.dia + " a las " + reserva.hora + ":" + reserva.minuto + " ha fallado ya que no existe. Igual está cerrado el gym o han cambiado la hora.\n_____________________________\n\n";
+
+				reservas_fallidas.num++
+			}
+		})
+	})
+}
+
+function reservarSesion(usuario, reserva, reservas_fallidas, mailOptions, sesion) {
+	pt.reservarCB(function (code, message) {
+		if(code != 410){
+			mailOptions.text += diasDeLaSemana[reserva.dayOfWeek] + " " + sesion.fecha.dia + "(" + sesion.fecha.hora + ":" + sesion.fecha.minuto + "): " + message
+			if(code != 0){
+				reservas_fallidas.num++
+			}
+		}
+
+		if(reserva.dayOfWeek == realDate.getDay()){
+			console.log("<---Reserva del día para " + usuario.email.toString())
+			console.log(sesion)
+			
+			setTimeout(function(usuario, reserva, reservas_fallidas, mailOptions, sesion){
+				if (reservas_fallidas.num > 0){
+					if (reservas_fallidas.num == 1)
+						mailOptions.subject = reservas_fallidas.num.toString() + ' RESERVA FALLIDAS' 
+					else
+						mailOptions.subject = reservas_fallidas.num.toString() + ' RESERVAS FALLIDAS'
+
+					if (!debug || usuario.email == 'oscar_alvarez62@hotmail.es') {
+						transporter.sendMail(mailOptions, function (error, info) {
+							if (error) {
+								console.log(error);
+							} else {
+								console.log('Email sent: ' + info.response);
+							}
+						});
+					}
+				}
+			}, 1500, usuario, reserva, reservas_fallidas, mailOptions, sesion)
+		}
+	}, sesion, usuario.token);
+}
+
+function toFechaObj(fecha) {
 	var dia = fecha.getDate();
 	if (dia < 10)
 		dia = '0' + dia.toString();
@@ -190,64 +240,4 @@ function toFechaObj(fecha){
 		"dia": dia,
 		"ano": ano
 	};
-}
-
-function nextWeekSesion(sesion){
-	let fechaReserva = new Date(parseInt(sesion.fecha.ano), parseInt(sesion.fecha.mes) - 1, parseInt(sesion.fecha.dia), 0, 0, 0, 0)
-	fechaReserva.setDate(fechaReserva.getDate() + 7)
-		
-	sesion.fecha.dia = fechaReserva.getDate()
-	sesion.fecha.mes = fechaReserva.getMonth() + 1
-	sesion.fecha.ano = fechaReserva.getFullYear()
-}
-
-//modo; 0->reserva repetida, 1->reserva anticipada, 2->reserva nueva con mail, 3-inf->reserva nueva sin mail
-function reservarSesion(sesion, usuario, reservas_fallidas, mailOptions, modo) {	
-	console.log("Empezando reserva para " + usuario.email.toString() + " a los " + new Date().getSeconds() + ":" + new Date().getMilliseconds());
-	
-	pt.reservarCB(function (code, message) {
-		if (code != 0 && code != 410 && (modo == 0 || modo == 2)) {
-			mailOptions[usuario.email].text += "La reserva del dia " + sesion.fecha.dia + " a las " + sesion.fecha.hora + ":" + sesion.fecha.minuto + " ha fallado con el siguiente mensaje:\n" + message + "\n_____________________________\n\n";
-			
-			reservas_fallidas[usuario.email]++
-		}
-		if (code == 0) {
-			mailOptions[usuario.email].text += "RESERVAS CORRECTAS:\n\nLa reserva del dia " + sesion.fecha.dia + " a las " + sesion.fecha.hora + ":" + sesion.fecha.minuto + " se ha realizado correctamente con el siguiente mensaje:\n" + message + "\n_____________________________\n\n";
-			
-			if(modo != 0)modo = 2;
-		}
-		if (modo == 2) {
-			console.log("<---Reservas acabadas para " + usuario.email.toString() + "a los " + new Date().getSeconds() + ":" + new Date().getMilliseconds() + "--->");
-
-			if(reservas_fallidas[usuario.email] > 0)
-				mailOptions[usuario.email].text = "RESERVAS FALLIDAS: \n\n" + mailOptions[usuario.email].text;
-
-			if (reservas_fallidas[usuario.email] == 1)
-				mailOptions[usuario.email].subject = reservas_fallidas[usuario.email].toString() + ' RESERVA FALLIDAS'
-			else
-				mailOptions[usuario.email].subject = reservas_fallidas[usuario.email].toString() + ' RESERVAS FALLIDAS'
-
-			if (!debug || usuario.email == 'oscar_alvarez62@hotmail.es') {
-				transporter.sendMail(mailOptions[usuario.email], function (error, info) {
-					if (error) {
-						console.log(error);
-					} else {
-						console.log('Email sent: ' + info.response);
-					}
-				});
-			}
-		}
-		
-	}, sesion, usuario.token);
-	
-	if (modo == 2){
-		console.log("<---Las cartas están echadas para " + usuario.email + "--->");
-		return;
-	}
-		
-	
-	if(modo > 2){
-		modo -= 1
-		setTimeout(reservarSesion, wait_time, sesion, usuario, reservas_fallidas, mailOptions, modo)
-	}
 }
