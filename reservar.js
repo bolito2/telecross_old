@@ -112,7 +112,7 @@ function preparativos() {
 								'diferencia': diferencia
 							}
 						});
-						if(reservas[0] == null || reservas[0] == undefined){
+						if(reservas[7] == null || reservas[7] == undefined){
 							comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions)
 						}	
 						else{
@@ -135,7 +135,7 @@ function disponibilidadLoop(usuario, reservas, reservas_fallidas, mailOptions) {
 	*/
 	console.log(usuario.email)
 
-	pt.disponibilidad(usuario.token, reservas[0].fechaObj, function (body) {
+	pt.disponibilidad(usuario.token, reservas[7].fechaObj, function (body) {
 		if (body.d.zones.length > 0) {
 			console.log("<---Encontrada disponibilidad--->")
 			comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions)
