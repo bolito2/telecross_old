@@ -83,7 +83,7 @@ function preparativos() {
 							from: 'crossfit-heces@megustacomermierda.com',
 							to: usuario.email,
 							subject: 'Informe reservas',
-							text: ''
+							text: []
 						}
 						//Lol
 						if (usuario.email == 'oscar_alvarez62@hotmail.es'){
@@ -97,21 +97,22 @@ function preparativos() {
 						JSON.parse(usuario.programacion).forEach(function (reserva) {
 							var fechaReserva = new Date(realDate);
 							let diferencia = reserva.dia - fechaReserva.getDay();
-							if (diferencia > 0)
-								fechaReserva.setDate(fechaReserva.getDate() + diferencia);
-							else
-								fechaReserva.setDate(fechaReserva.getDate() + diferencia + 7);
+							if (diferencia <= 0){
+								diferencia += 7
+							}	
+							fechaReserva.setDate(fechaReserva.getDate() + diferencia);
 
 							let fechaObj = toFechaObj(fechaReserva)
 
-							reservas[diferencia + 10] = {
+							reservas[diferencia] = {
 								'hora': reserva.hora,
 								'minuto': reserva.minuto,
-								"fechaObj": fechaObj,
-								'dayOfWeek': fechaReserva.getDay()
+								'fechaObj': fechaObj,
+								'dayOfWeek': fechaReserva.getDay(),
+								'diferencia': diferencia
 							}
 						});
-						if(reservas[10] == null || reservas[10] == undefined){
+						if(reservas[0] == null || reservas[0] == undefined){
 							comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions)
 						}	
 						else{
@@ -134,7 +135,7 @@ function disponibilidadLoop(usuario, reservas, reservas_fallidas, mailOptions) {
 	*/
 	console.log(usuario.email)
 
-	pt.disponibilidad(usuario.token, reservas[10].fechaObj, function (body) {
+	pt.disponibilidad(usuario.token, reservas[0].fechaObj, function (body) {
 		if (body.d.zones.length > 0) {
 			console.log("<---Encontrada disponibilidad--->")
 			comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions)
@@ -177,7 +178,7 @@ function comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions){
 				}
 			}
 			if (!encontrada) {
-				mailOptions.text += "La reserva del dia " + reserva.dia + " a las " + reserva.hora + ":" + reserva.minuto + " ha fallado ya que no existe. Igual está cerrado el gym o han cambiado la hora.\n_____________________________\n\n";
+				mailOptions.text[reserva.diferencia] = "La reserva del dia " + reserva.dia + " a las " + reserva.hora + ":" + reserva.minuto + " ha fallado ya que no existe. Igual está cerrado el gym o han cambiado la hora.\n_____________________________\n\n";
 
 				reservas_fallidas.num++
 			}
@@ -188,7 +189,7 @@ function comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions){
 function reservarSesion(usuario, reserva, reservas_fallidas, mailOptions, sesion) {
 	pt.reservarCB(function (code, message) {
 		if(code != 410){
-			mailOptions.text += diasDeLaSemana[reserva.dayOfWeek] + " " + sesion.fecha.dia + "(" + sesion.fecha.hora + ":" + sesion.fecha.minuto + "): " + message
+			mailOptions.text[reserva.diferencia] = diasDeLaSemana[reserva.dayOfWeek] + " " + sesion.fecha.dia + "(" + sesion.fecha.hora + ":" + sesion.fecha.minuto + "): " + message
 			if(code != 0){
 				reservas_fallidas.num++
 			}
@@ -205,6 +206,12 @@ function reservarSesion(usuario, reserva, reservas_fallidas, mailOptions, sesion
 					else
 						mailOptions.subject = reservas_fallidas.num.toString() + ' RESERVAS FALLIDAS'
 
+					let final_string = ''
+					mailOptions.text.forEach(function(line){
+						final_string += line + '\n'
+					})
+					mailOptions.text = final_string
+					
 					if (!debug || usuario.email == 'oscar_alvarez62@hotmail.es') {
 						transporter.sendMail(mailOptions, function (error, info) {
 							if (error) {

@@ -62,20 +62,20 @@ module.exports = {
 				cb(error);
 			}else{
 					if(body.Result == 0){
-						cb(0,"Todo bien. Plazas restantes: " + (12 - body.d.horario.reservas).toString() + "\n");
+						cb(0,"Todo bien. Plazas restantes: " + (12 - body.d.horario.reservas).toString());
 						
 						console.log(body.d.horario.reservas);
 					}else if(body.Result == 410){
-							cb(410,"Hora ya reservada(410)\n");
+							cb(410,"Hora ya reservada(410)");
 						}
 						else if(body.Result == 411){
-							cb(411, "Hay otra actividad reservada ese día(411)\n");
+							cb(411, "Hay otra actividad reservada ese día(411)");
 						}
 						else if(body.Result == 401){
-							cb(401,"No quedan plazas(401)\n");
+							cb(401,"No quedan plazas(401)");
 						}
 						else{
-							cb(body.Result, "No se que heces has hecho pero has obtenido un error que no he visto en mi vida con el codigo " + body.Result.toString() + "\n");
+							cb(body.Result, "No se que heces has hecho pero has obtenido un error que no he visto en mi vida con el codigo " + body.Result.toString());
 						}
 				}
 		});
