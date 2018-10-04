@@ -116,6 +116,7 @@ function preparativos() {
 							comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions)
 						}	
 						else{
+							console.log(reservas)
 							disponibilidadLoop(usuario, reservas, reservas_fallidas, mailOptions)
 						}
 					})
@@ -136,7 +137,7 @@ function disponibilidadLoop(usuario, reservas, reservas_fallidas, mailOptions) {
 	console.log(usuario.email)
 
 	pt.disponibilidad(usuario.token, reservas[7].fechaObj, function (body) {
-		if (body.d.zones.length > 0) {
+		if (body.d != null && body.d.zones.length > 0) {
 			console.log("<---Encontrada disponibilidad--->")
 			comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions)
 		}else{
