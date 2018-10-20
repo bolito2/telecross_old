@@ -16,7 +16,7 @@ var transporter = nodemailer.createTransport({
 var debug = (process.env.debug == 'true')
 var antelacion = parseInt(process.env.antelacion)
 
-var wait_time = 1000
+var wait_time = 1500
 
 console.log("SCHEDULING RESERVAS WITH ANTELACION = " + antelacion.toString())
 
@@ -116,7 +116,7 @@ function preparativos() {
 							comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions)
 						}	
 						else{
-							console.log(reservas)
+							console.log(reservas[7])
 							disponibilidadLoop(usuario, reservas, reservas_fallidas, mailOptions)
 						}
 					})
@@ -134,11 +134,9 @@ function disponibilidadLoop(usuario, reservas, reservas_fallidas, mailOptions) {
 		return;
 	}
 	*/
-	console.log(usuario.email)
-
 	pt.disponibilidad(usuario.token, reservas[7].fechaObj, function (body) {
 		if (body.d != null && body.d.zones.length > 0) {
-			console.log("<---Encontrada disponibilidad--->")
+			console.log("<---Encontrada disponibilidad para " + usuario.email + "--->")
 			comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions)
 		}else{
 			setTimeout(disponibilidadLoop, wait_time, usuario, reservas, reservas_fallidas, mailOptions)
@@ -146,6 +144,8 @@ function disponibilidadLoop(usuario, reservas, reservas_fallidas, mailOptions) {
 	})
 }
 function comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions){
+	console.log("<---Comenzando reservas para " + usuario.email + "--->")
+	
 	reservas.forEach(function(reserva){
 		
 		pt.disponibilidad(usuario.token, reserva.fechaObj, function (body) {
@@ -171,17 +171,18 @@ function comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions){
 						
 						if(data.hora.hours == reserva.hora && data.hora.minutes == reserva.minuto) {
 							encontrada = true
+							console.log("ENCONTRADA: " + reserva.toString() + " --->\n" + sesion.toString())
 							
 							reservarSesion(usuario, reserva, reservas_fallidas, mailOptions, sesion)
-							//RESERVAR TODO
 						}
 					} 
 				}
 			}
 			if (!encontrada) {
-				mailOptions.text[reserva.diferencia] = "La reserva del dia " + reserva.dia + " a las " + reserva.hora + ":" + reserva.minuto + " ha fallado ya que no existe. Igual está cerrado el gym o han cambiado la hora.\n_____________________________\n\n";
-
-				reservas_fallidas.num++
+				mailOptions.text[reserva.diferencia] = reserva.dia + "(" + reserva.hora + ":" + reserva.minuto + "): No disponible. Se reservará a las " + last_option.fecha.hora.toString() + ":" + last_option.fecha.minuto.toString();
+				console.log("NO ENCONTRADA: " + reserva.toString() + " --->\n" + last_option.toString())
+				
+				reservarSesion(usuario, reserva, reservas_fallidas, mailOptions, last_option)
 			}
 		})
 	})
@@ -197,13 +198,13 @@ function reservarSesion(usuario, reserva, reservas_fallidas, mailOptions, sesion
 		}
 
 		if(reserva.dayOfWeek == realDate.getDay()){
-			console.log("<---Reserva del día para " + usuario.email.toString())
+			console.log("<---Reserva del día para " + usuario.email.toString() + "--->")
 			console.log(sesion)
 			
 			setTimeout(function(usuario, reserva, reservas_fallidas, mailOptions, sesion){
 				if (reservas_fallidas.num > 0){
 					if (reservas_fallidas.num == 1)
-						mailOptions.subject = reservas_fallidas.num.toString() + ' RESERVA FALLIDAS' 
+						mailOptions.subject = reservas_fallidas.num.toString() + ' RESERVA FALLIDA' 
 					else
 						mailOptions.subject = reservas_fallidas.num.toString() + ' RESERVAS FALLIDAS'
 

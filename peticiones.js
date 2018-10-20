@@ -75,7 +75,7 @@ module.exports = {
 							cb(401,"No quedan plazas(401)");
 						}
 						else{
-							cb(body.Result, "No se que heces has hecho pero has obtenido un error que no he visto en mi vida con el codigo " + body.Result.toString());
+							cb(-1, "Error desconocido(" + body.toString() + ")");
 						}
 				}
 		});
