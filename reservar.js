@@ -150,7 +150,7 @@ function comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions){
 
 		pt.disponibilidad(usuario.token, reserva.fechaObj, function (body) {
 			let encontrada = false
-			let last_option = 'nada'
+			let last_option = null
 
 			for (var i = 0; i < body.d.zones.length; i++) {
 				for (var j = 0; j < body.d.zones[i].datas.length; j++) {
@@ -180,10 +180,11 @@ function comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions){
 			}
 			if (!encontrada) {
 				if(last_option == null){
-					console.log("No hay reservas wtf")
-					console.log(body.d.zones)
+					mailOptions.text[reserva.diferencia] = diasDeLaSemana[reserva.dayOfWeek] + " " + reserva.fechaObj.dia + "(" + reserva.hora + ":" + reserva.minuto + "): Este día no hay cross yororo"
+					reservas_fallidas.num++
 				}else{
-					mailOptions.text[reserva.diferencia] = reserva.dia + "(" + reserva.hora + ":" + reserva.minuto + "): No disponible. Se reservará a las " + last_option.fecha.hora.toString() + ":" + last_option.fecha.minuto.toString();
+					console.log(last_option)
+					mailOptions.text[reserva.diferencia] = diasDeLaSemana[reserva.dayOfWeek] + " " + reserva.fechaObj.dia + "(" + reserva.hora + ":" + reserva.minuto + "): No disponible. Se reservará a las " + last_option.fecha.hora.toString() + ":" + last_option.fecha.minuto.toString();
 					console.log("NO ENCONTRADA: " + reserva.toString() + " --->\n" + last_option.toString())
 
 					reservarSesion(usuario, reserva, reservas_fallidas, mailOptions, last_option)
