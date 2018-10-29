@@ -16,11 +16,10 @@
     "nodemailer": "^4.6.4",
     "pg": "6.x",
     "psql": "0.0.1",
-    "request": "2.83.0",
     "slimbot": "^0.7.17"
   },
   "devDependencies": {
-    "request": "2.83.0",
+    "request": "^2.83.0",
     "tape": "^4.7.0"
   },
   "repository": {
