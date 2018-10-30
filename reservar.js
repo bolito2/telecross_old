@@ -173,6 +173,8 @@ function comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions){
 							encontrada = true
 							console.log("ENCONTRADA: " + reserva.toString() + " --->\n" + sesion.toString())
 
+							mailOptions.text[reserva.diferencia] = ''
+
 							reservarSesion(usuario, reserva, reservas_fallidas, mailOptions, sesion)
 						}
 					}
@@ -184,7 +186,7 @@ function comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions){
 					reservas_fallidas.num++
 				}else{
 					console.log(last_option)
-					mailOptions.text[reserva.diferencia] = diasDeLaSemana[reserva.dayOfWeek] + " " + reserva.fechaObj.dia + "(" + reserva.hora + ":" + reserva.minuto + "): No disponible. Se reservará a las " + last_option.fecha.hora.toString() + ":" + last_option.fecha.minuto.toString();
+					mailOptions.text[reserva.diferencia] = diasDeLaSemana[reserva.dayOfWeek] + " " + reserva.fechaObj.dia + "(" + reserva.hora + ":" + reserva.minuto + "): No disponible. Se reservará el ";
 					console.log("NO ENCONTRADA: " + reserva.toString() + " --->\n" + last_option.toString())
 
 					reservarSesion(usuario, reserva, reservas_fallidas, mailOptions, last_option)
@@ -197,7 +199,7 @@ function comenzarReservas(usuario, reservas, reservas_fallidas, mailOptions){
 function reservarSesion(usuario, reserva, reservas_fallidas, mailOptions, sesion) {
 	pt.reservarCB(function (code, message) {
 		if(code != 410){
-			mailOptions.text[reserva.diferencia] = diasDeLaSemana[reserva.dayOfWeek] + " " + sesion.fecha.dia + "(" + sesion.fecha.hora + ":" + sesion.fecha.minuto + "): " + message
+			mailOptions.text[reserva.diferencia] += diasDeLaSemana[reserva.dayOfWeek] + " " + sesion.fecha.dia + "(" + sesion.fecha.hora + ":" + sesion.fecha.minuto + "): " + message
 			if(code != 0){
 				reservas_fallidas.num++
 			}
