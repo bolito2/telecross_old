@@ -136,7 +136,6 @@ function disponibilidadLoop(usuario, reservas, num_reservas, mailOptions) {
 		return;
 	}
 	*/
-	console.log('Checking '+ usuario.email)
 	pt.disponibilidad(usuario.token, reservas[7].fechaObj, function (body) {
 		if (body.d != null && body.d.count > 0) {
 			console.log("<---Encontrada disponibilidad para " + usuario.email + "--->")
