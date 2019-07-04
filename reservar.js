@@ -181,6 +181,7 @@ function comenzarReservas(usuario, reservas, num_reservas, mailOptions){
 							if(data.hora.hours == reserva.hora && data.hora.minutes == reserva.minuto) {
 								encontrada = true
 								console.log(usuario.email + ": ENCONTRADA: " + JSON.stringify(reserva) + " ---> " + JSON.stringify(sesion))
+								console.log("num reservas: " + data.reservas.toString())
 								num_reservas.disponibles++;
 
 								mailOptions.text[reserva.diferencia] = ''
