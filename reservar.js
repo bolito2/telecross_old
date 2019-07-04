@@ -34,7 +34,7 @@ function checkTime(antelacion) {
 		preparativos()
 	}
 	else {
-		setTimeout(checkTime, wait_time*3, antelacion);
+		setTimeout(checkTime, wait_time, antelacion);
 	}
 }
 
